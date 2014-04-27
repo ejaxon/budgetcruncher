@@ -1,0 +1,40 @@
+Account Code Key:
+
+aaaa-bb-cc-ddd-eeee-fffff-ggggg-hhh-iiiiii- name
+
+Where
+
+	aaaa	=	Fund
+	bb		=	Function
+	cc		=	Department
+	ddd		= 	Division
+	eeee	=	Cost center (not used here)
+	fffff	=	Grant code (not used here)
+	ggggg	=	Not used
+	hhh		=	Not used
+	iiiiii	= 	Object code (actual account - numeric code for following name)
+	
+	
+here is the breakdown for the account number....
+1,2,3,4 - 5,6 - 7,8 - 9,10,11 - 12,13,14,15 - 16,17,18,19,20 - 21,22,23,24,25 - 26,27,28 - 29,30,31,32,33,34-35,36,37,38,39
+
+
+1-4  fund code
+1-2 character code
+5-6 function code
+7-8 department code
+9-11 division code
+12,15 cost center
+ 
+not 100% sure looks like its
+
+when there is not cost center
+    fund + 0 + division  =    org code
+when a cost center looks ik
+  fund + 0 + cost center =    org code
+ 
+16-20  grant code
+21-25 not used
+26-28 not used        
+29-34 object code
+35-39 project code
