@@ -14,6 +14,10 @@ public class AccountEntry {
 		return accountCode;
 	}
 	
+	public String getAnnotation() {
+		return annotation;
+	}
+	
 	public String[] getValues () {
 		return values;
 	}
@@ -26,5 +30,9 @@ public class AccountEntry {
 	
 	public void setValue(int year, String val) {
 		values[year] = val;
+	}
+	
+	public void setAnnotation(String ann) {
+		annotation = ann;
 	}
 }
