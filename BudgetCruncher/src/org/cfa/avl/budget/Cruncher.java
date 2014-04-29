@@ -22,6 +22,10 @@ public class Cruncher {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		HashMap<String, Integer> fileList = new HashMap<String, Integer>();
 		HashMap<String, AccountEntry> accountEntries = new HashMap<String, AccountEntry>();
+		HashMap<String, String> fundMap = new HashMap<String,String>();
+		HashMap<String, String> deptMap = new HashMap<String,String>();
+		HashMap<String, String> divisionMap = new HashMap<String,String>();
+		HashMap<String, String> objectMap = new HashMap<String,String>();
 		
 		if (args.length != 1) {
 			System.err.println("Directory path parameter required");
@@ -67,6 +71,7 @@ public class Cruncher {
 			ex.printStackTrace();
 			System.exit(1);
 		}
+		
 		System.out.println("");
 
 		int baseYear = Integer.parseInt(parameters.get("startYear"));
@@ -94,7 +99,32 @@ public class Cruncher {
 					}
 				}
 			}
-			
+			try {
+				filePath = directoryName + parameters.get("fundCodes");
+				input = new BufferedReader(new FileReader(filePath));
+				processCodeMap(input, fundMap);
+				input.close();
+
+				filePath = directoryName + parameters.get("deptCodes");
+				input = new BufferedReader(new FileReader(filePath));
+				processCodeMap(input, deptMap);
+				input.close();
+
+				filePath = directoryName + parameters.get("divisionCodes");
+				input = new BufferedReader(new FileReader(filePath));
+				processCodeMap(input, divisionMap);
+				input.close();
+
+				filePath = directoryName + parameters.get("objectCodes");
+				input = new BufferedReader(new FileReader(filePath));
+				processCodeMap(input, objectMap);
+				input.close();
+
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+				
 			/*
 			 * Read and add the annotations
 			 */
@@ -136,7 +166,8 @@ public class Cruncher {
 						String object = matcher.group(10);
 						String annotation = accountEntry.getAnnotation();
 						if (annotation == null) annotation = " ";
-						line = fundCode + ", " + deptCode + ", " + divisionCode + ", " + object;
+						line = fundMap.get(fundCode) + ", " + deptMap.get(deptCode) + ", " 
+								+ divisionMap.get(divisionCode) + ", " + objectMap.get(object);
 						for (int i=0; i<numberOfYears; ++i) {
 							line += ", " + accountEntry.getValue(i);
 						}
@@ -161,6 +192,18 @@ public class Cruncher {
 			System.exit(1);
 		}
 		System.out.println("Processing complete");
+	}
+	
+	static void processCodeMap (BufferedReader input, HashMap<String,String> map) throws IOException {
+		String line;
+		String[] items;
+		input.readLine(); // Skip the header
+		while ((line = input.readLine()) != null) {
+			items = line.split(",");
+			if (items.length == 2) {
+				map.put(items[0].trim(), items[1].trim());
+			}
+		}
 	}
 	
 	static void processInputFile(BufferedReader input, HashMap<String, AccountEntry> accountEntries, 
