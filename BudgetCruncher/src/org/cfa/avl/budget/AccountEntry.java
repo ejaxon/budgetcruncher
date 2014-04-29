@@ -23,4 +23,8 @@ public class AccountEntry {
 		if (values != null && values.length > year) val = values[year];
 		return val;
 	}
+	
+	public void setValue(int year, String val) {
+		values[year] = val;
+	}
 }
