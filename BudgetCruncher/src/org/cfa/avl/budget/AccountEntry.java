@@ -1,15 +1,20 @@
 package org.cfa.avl.budget;
 
 public class AccountEntry {
+	boolean isRevenueFlag = false;
 	String accountCode = null;
 	String annotation = null;
 	String[] values = null;
 	
-	public AccountEntry(String code, int nYears) {
+	public AccountEntry(String code, int nYears, boolean isRev) {
 		accountCode = code;
 		values = new String[nYears];
+		isRevenueFlag = isRev;
 	}
 
+	public boolean isRevenue() {
+		return isRevenueFlag;
+	}
 	public String getAccountCode () {
 		return accountCode;
 	}

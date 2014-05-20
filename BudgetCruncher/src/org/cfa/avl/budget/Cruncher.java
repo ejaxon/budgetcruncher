@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class Cruncher {
 	static String accountRegex = "((\\d{4})-(\\d{2})-(\\d{2})-([\\d\\w]{3})-(\\d{4})-(\\d{5})-(\\d{5})-(\\d{3})-(\\d{6}))-.*";
 	static String annotationRegex = "((\\d{4})-(\\d{2})-(\\d{2})-([\\d\\w]{3})-(\\d{4})-(\\d{5})-(\\d{5})-(\\d{3})-(\\d{6}))";
-	private static PrintWriter output = null;
+	private static PrintWriter expenseOutput = null, revenueOutput = null, diffOutput = null;
 
 	public static void main(String[] args) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
@@ -143,8 +143,12 @@ public class Cruncher {
 			/*
 			 * Now output the file
 			 */
-			filePath = directoryName + parameters.get("outputFileName");
-			output  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
+			filePath = directoryName + "expenses.csv";
+			expenseOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
+			filePath = directoryName + "revenues.csv";
+			revenueOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
+			filePath = directoryName + "budgetdiffs.csv";
+			diffOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
 			 		
 			try {
 				String line = "";
@@ -154,7 +158,10 @@ public class Cruncher {
 					line += ", " + year;
 				}
 				
-				output .println("Fund, Department, Division, Account" + line);
+				expenseOutput.println("Fund, Department, Division, Account" + line);
+				revenueOutput.println("Fund, Department, Division, Account" + line);
+				diffOutput.println("Fund,Department,Division,Account,Amount,Annotation,");
+
 				Pattern pattern = Pattern.compile(annotationRegex);
 				for (String account: accountEntries.keySet()) {
 					AccountEntry accountEntry = accountEntries.get(account);
@@ -166,13 +173,31 @@ public class Cruncher {
 						String object = matcher.group(10);
 						String annotation = accountEntry.getAnnotation();
 						if (annotation == null) annotation = " ";
-						line = fundMap.get(fundCode) + ", " + deptMap.get(deptCode) + ", " 
-								+ divisionMap.get(divisionCode) + ", " + objectMap.get(object);
-						for (int i=0; i<numberOfYears; ++i) {
-							line += ", " + accountEntry.getValue(i);
+						line = fundMap.get(fundCode) + "," + deptMap.get(deptCode) + "," 
+								+ divisionMap.get(divisionCode) + "," + objectMap.get(object);
+						/*
+						 * Deal with the budget difference
+						 */
+						String[] values = accountEntry.getValues();
+						Double oldVal = 0.0, newVal = 0.0, diff = 0.0;
+						if (values != null) {
+							if (values[numberOfYears-2] != null) oldVal = Double.parseDouble(values[numberOfYears-2]);
+							if (values[numberOfYears-1] != null) newVal = Double.parseDouble(values[numberOfYears-1]);
 						}
-						line += ", " + annotation;
-						output .println(line);
+						diff = newVal - oldVal;
+						String diffLine = line + "," + diff.toString() + "," + annotation;
+						diffOutput.println(diffLine);
+						/*
+						 * Now deal with the budget/actual history
+						 */
+						for (int i=0; i<numberOfYears; ++i) {
+							line += "," + accountEntry.getValue(i);
+						}
+						line += "," + annotation;
+						@SuppressWarnings("resource")
+						PrintWriter writer = (accountEntry.isRevenue())?revenueOutput:expenseOutput;
+
+						writer.println(line);
 					}
 					else {
 						throw new Exception("Failed to match account " + account);
@@ -182,8 +207,14 @@ public class Cruncher {
 			catch (Exception ex) {
 				ex.printStackTrace();
 			}
-			if (output  != null) {
-				output .close();
+			if (expenseOutput  != null) {
+				expenseOutput .close();
+			}
+			if (revenueOutput  != null) {
+				revenueOutput .close();
+			}
+			if (diffOutput  != null) {
+				diffOutput .close();
 			}
 
 		}
@@ -233,7 +264,10 @@ public class Cruncher {
 				String accountCode = matcher.group(1);
 				AccountEntry acctEntry = accountEntries.get(accountCode);
 				if (acctEntry == null) {
-					acctEntry = new AccountEntry (accountCode, nYears);
+					boolean isRev = false;
+					String objectCode = matcher.group(10);
+					if (objectCode.charAt(0) == '4') isRev = true;
+					acctEntry = new AccountEntry (accountCode, nYears, isRev);
 					accountEntries.put(accountCode, acctEntry);
 				}
 				acctEntry.setValue(yearDelta, items[selectedColumn].trim());
