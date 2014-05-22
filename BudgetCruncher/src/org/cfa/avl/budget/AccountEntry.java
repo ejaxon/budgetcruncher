@@ -72,7 +72,6 @@ public class AccountEntry {
 		if (level == 0) { // use Fund
 			AccountEntry next = children.get(a.fund);
 			if (next == null) {
-				System.out.println("Level 0 creating the next level");
 				next = new AccountEntry (null, values.length, false, level+1, a.fund, null, null, null);
 				children.put(a.fund, next);
 			}
