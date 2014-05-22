@@ -18,10 +18,13 @@ public class Cruncher {
 	static String annotationRegex = "((\\d{4})-(\\d{2})-(\\d{2})-([\\d\\w]{3})-(\\d{4})-(\\d{5})-(\\d{5})-(\\d{3})-(\\d{6}))";
 	private static PrintWriter expenseOutput = null, revenueOutput = null, diffOutput = null;
 
+	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		HashMap<String, Integer> fileList = new HashMap<String, Integer>();
 		HashMap<String, AccountEntry> accountEntries = new HashMap<String, AccountEntry>();
+		AccountEntry topRevLevel =null, topExpLevel = null;
+		
 		HashMap<String, String> fundMap = new HashMap<String,String>();
 		HashMap<String, String> deptMap = new HashMap<String,String>();
 		HashMap<String, String> divisionMap = new HashMap<String,String>();
@@ -71,15 +74,45 @@ public class Cruncher {
 			ex.printStackTrace();
 			System.exit(1);
 		}
-		
+
+		/*
+		 * Now get the names to map account numbers to
+		 */
+		String filePath;
+		try {
+			filePath = directoryName + parameters.get("fundCodes");
+			input = new BufferedReader(new FileReader(filePath));
+			processCodeMap(input, fundMap);
+			input.close();
+
+			filePath = directoryName + parameters.get("deptCodes");
+			input = new BufferedReader(new FileReader(filePath));
+			processCodeMap(input, deptMap);
+			input.close();
+
+			filePath = directoryName + parameters.get("divisionCodes");
+			input = new BufferedReader(new FileReader(filePath));
+			processCodeMap(input, divisionMap);
+			input.close();
+
+			filePath = directoryName + parameters.get("objectCodes");
+			input = new BufferedReader(new FileReader(filePath));
+			processCodeMap(input, objectMap);
+			input.close();
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 		System.out.println("");
 
 		int baseYear = Integer.parseInt(parameters.get("startYear"));
 		int numberOfYears = Integer.parseInt(parameters.get("numberOfYears"));
 		
+		topRevLevel = new AccountEntry(null, numberOfYears, true, 0, null, null, null, null);
+		topExpLevel = new AccountEntry(null, numberOfYears, false, 0, null, null, null, null);
 		try {
 			Integer selectedColumn;
-			String filePath;
 			/*
 			 * Read in all of the files - each file specifies a name and a column to pick the value from
 			 * (e.g., we may wish to use actuals from previous years, but budget from the current)
@@ -90,7 +123,9 @@ public class Cruncher {
 				input = new BufferedReader(new FileReader(filePath));
 				if (input != null) {
 					System.out.println("Processing file " + fileName);
-					processInputFile(input, accountEntries, baseYear, numberOfYears, selectedColumn);
+
+					processInputFile(input, accountEntries, baseYear, numberOfYears, selectedColumn,
+									 fundMap, deptMap, divisionMap, objectMap);
 					try {
 						input.close();
 					}
@@ -98,31 +133,6 @@ public class Cruncher {
 						ex.printStackTrace();
 					}
 				}
-			}
-			try {
-				filePath = directoryName + parameters.get("fundCodes");
-				input = new BufferedReader(new FileReader(filePath));
-				processCodeMap(input, fundMap);
-				input.close();
-
-				filePath = directoryName + parameters.get("deptCodes");
-				input = new BufferedReader(new FileReader(filePath));
-				processCodeMap(input, deptMap);
-				input.close();
-
-				filePath = directoryName + parameters.get("divisionCodes");
-				input = new BufferedReader(new FileReader(filePath));
-				processCodeMap(input, divisionMap);
-				input.close();
-
-				filePath = directoryName + parameters.get("objectCodes");
-				input = new BufferedReader(new FileReader(filePath));
-				processCodeMap(input, objectMap);
-				input.close();
-
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
 			}
 				
 			/*
@@ -139,79 +149,92 @@ public class Cruncher {
 					ex.printStackTrace();
 				}
 			}
-
+			
 			/*
-			 * Now output the file
+			 * Now prune entries that are zero the last 2 years,
+			 * then build the hierarchy for output
 			 */
-			filePath = directoryName + "expenses.csv";
-			expenseOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
-			filePath = directoryName + "revenues.csv";
-			revenueOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
-			filePath = directoryName + "budgetdiffs.csv";
-			diffOutput  = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
-			 		
+			ArrayList<AccountEntry> toDelete = new ArrayList<AccountEntry>();
+			for (String account: accountEntries.keySet()) {
+				AccountEntry a = accountEntries.get(account);
+				Double[] values = a.getValues();
+				if (values != null && values.length > 1) {
+					double d = Math.abs(values[values.length-1]) + Math.abs(values[values.length-2]);
+					if (d < 0.5) toDelete.add(a);
+				}
+			}
+			while (toDelete.size() > 0) {
+				AccountEntry a = toDelete.remove(0);
+				accountEntries.remove(a.accountCode);
+			}
+			for (String account: accountEntries.keySet()) {
+				AccountEntry accountEntry = accountEntries.get(account);
+				if (accountEntry.isRevenue())
+					topRevLevel.addEntry(accountEntry);
+				else
+					topExpLevel.addEntry(accountEntry);
+			}
+			
+			/*  
+			 * Output revenues and expenses files
+			 */
 			try {
-				String line = "";
-				
+				String header = "LEVEL1,LEVEL2,LEVEL3,TOOLTIP,SOURCE,SOURCE URL";
 				for (int i=0; i< numberOfYears; ++i) {
 					int year = baseYear + i;
-					line += ", " + year;
+					header += "," + year;
 				}
+				header += ",LEVEL";
 				
-				expenseOutput.println("Fund, Department, Division, Account" + line);
-				revenueOutput.println("Fund, Department, Division, Account" + line);
-				diffOutput.println("Fund,Department,Division,Account,Amount,Annotation,");
-
-				Pattern pattern = Pattern.compile(annotationRegex);
-				for (String account: accountEntries.keySet()) {
-					AccountEntry accountEntry = accountEntries.get(account);
-					Matcher matcher = pattern.matcher(account);
-					if (matcher.matches()) {
-						String fundCode = matcher.group(2);
-						String deptCode = matcher.group(4);
-						String divisionCode = matcher.group(5);
-						String object = matcher.group(10);
-						String annotation = accountEntry.getAnnotation();
-						if (annotation == null) annotation = " ";
-						line = fundMap.get(fundCode) + "," + deptMap.get(deptCode) + "," 
-								+ divisionMap.get(divisionCode) + "," + objectMap.get(object);
-						/*
-						 * Deal with the budget difference
-						 */
-						String[] values = accountEntry.getValues();
-						Double oldVal = 0.0, newVal = 0.0, diff = 0.0;
-						if (values != null) {
-							if (values[numberOfYears-2] != null) oldVal = Double.parseDouble(values[numberOfYears-2]);
-							if (values[numberOfYears-1] != null) newVal = Double.parseDouble(values[numberOfYears-1]);
-						}
-						diff = newVal - oldVal;
-						String diffLine = line + "," + diff.toString() + "," + annotation;
-						diffOutput.println(diffLine);
-						/*
-						 * Now deal with the budget/actual history
-						 */
-						for (int i=0; i<numberOfYears; ++i) {
-							line += "," + accountEntry.getValue(i);
-						}
-						line += "," + annotation;
-						@SuppressWarnings("resource")
-						PrintWriter writer = (accountEntry.isRevenue())?revenueOutput:expenseOutput;
-
-						writer.println(line);
-					}
-					else {
-						throw new Exception("Failed to match account " + account);
-					}
-				}
+				expenseOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "expenses.csv")));
+				expenseOutput.println(header);
+				topExpLevel.printEntries(expenseOutput);
+				
+				revenueOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "revenues.csv")));				
+				revenueOutput.println(header);
+				topRevLevel.printEntries(revenueOutput);
 			}
 			catch (Exception ex) {
 				ex.printStackTrace();
 			}
+			if (revenueOutput  != null) {
+				revenueOutput .close();
+			}
 			if (expenseOutput  != null) {
 				expenseOutput .close();
 			}
-			if (revenueOutput  != null) {
-				revenueOutput .close();
+			
+			
+			Pattern pattern = Pattern.compile(annotationRegex);
+			
+			/*
+			 * Now output the diffs file
+			 */
+			diffOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "budgetdiffs.csv")));
+			 		
+			try {
+				diffOutput.println("Fund,Department,Division,Account,Amount,Current,Annotation,");
+
+				for (String account: accountEntries.keySet()) {
+					AccountEntry a = accountEntries.get(account);
+					String annotation = a.getAnnotation();
+					if (annotation == null) annotation = " ";
+					String diffLine = a.fund + "," + a.department + "," 
+							+ a.division + "," + a.account;
+					Double[] values = a.getValues();
+					Double oldVal = 0.0, newVal = 0.0, diff = 0.0;
+					if (values != null) {
+						if (values[numberOfYears-2] != null) oldVal = values[numberOfYears-2];
+						if (values[numberOfYears-1] != null) newVal = values[numberOfYears-1];
+					}
+
+					diff = newVal - oldVal;
+					diffLine += "," + diff.toString() + "," + newVal + "," + annotation;
+					diffOutput.println(diffLine);
+				}
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
 			}
 			if (diffOutput  != null) {
 				diffOutput .close();
@@ -238,7 +261,9 @@ public class Cruncher {
 	}
 	
 	static void processInputFile(BufferedReader input, HashMap<String, AccountEntry> accountEntries, 
-							int baseYear, int nYears, int selectedColumn) throws Exception {
+								int baseYear, int nYears, int selectedColumn,
+								HashMap<String, String> fundMap, HashMap<String, String> deptMap, HashMap<String, 
+								String> divisionMap, HashMap<String, String> objectMap) throws Exception {
 		String line;
 		String[] items;
 		int year, yearDelta;
@@ -263,15 +288,29 @@ public class Cruncher {
 			if (matcher.matches()) {
 				String accountCode = matcher.group(1);
 				AccountEntry acctEntry = accountEntries.get(accountCode);
+				
 				if (acctEntry == null) {
 					boolean isRev = false;
+					String fundCode = matcher.group(2);
+					String deptCode = matcher.group(4);
+					String divisionCode = matcher.group(5);
 					String objectCode = matcher.group(10);
 					if (objectCode.charAt(0) == '4') isRev = true;
-					acctEntry = new AccountEntry (accountCode, nYears, isRev);
+					
+					// Get rid of leading zeros
+					try {
+						Integer idept = Integer.parseInt(deptCode);
+						deptCode = idept.toString();
+					}
+					catch (Exception e) {
+						// Skip it - not an integer
+					}
+					acctEntry = new AccountEntry (accountCode, nYears, isRev, 3,
+												  fundMap.get(fundCode), deptMap.get(deptCode), 
+												  divisionMap.get(divisionCode), objectMap.get(objectCode));
 					accountEntries.put(accountCode, acctEntry);
 				}
-				acctEntry.setValue(yearDelta, items[selectedColumn].trim());
-				//System.out.println("Fund = " + matcher.group(2) + " and account code is " + matcher.group(1));
+				acctEntry.setValue(yearDelta, items[selectedColumn].trim(), true);
 			}
 		}
 	}	
