@@ -1,0 +1,119 @@
+16d15
+< Stormwater Fund,Public Works,Stormwater Admin Division,Installment Purch Proceed,0.0,206000.0,true, 
+59a59
+> General Fund,Transportation,Street Lighting Division,Street Lighting,-337739.0,1331000.0,false, 
+76c76
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Appropriated Fund Balance,250000.0,750000.0,true, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Appropriated Fund Balance,100000.0,600000.0,true, 
+80a81
+> Stormwater Fund,Public Works,Stormwater Admin Division,null,0.0,206000.0,true, 
+203c204
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Undefined Claims,1.0726599E7,1.0726599E7,false, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Undefined Claims,1.0751345E7,1.0751345E7,false, 
+217c218
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Rental/Lease,-34993.0,2000.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Rental/Lease,-36993.0,0.0,false, 
+283c284
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Sales & Serv - Street Patches,146999.0,1483814.0,true, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Sales & Serv - Street Patches,213985.0,1550800.0,true, 
+421c422
+< Property and Liability Fund,Administration Services,General Insurance and Bonds,Charges for Services,-147178.0,2204297.0,true, 
+---
+> Property and Liability Fund,Administration Services,General Insurance and Bonds,Charges for Services,-347178.0,2004297.0,true, 
+431c432
+< Street Cut Utility Fund,Public Works,Street Cuts Division,All Other Expenses,-2459.0,23555.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,All Other Expenses,167.0,26181.0,false, 
+465a467
+> General Fund,Transportation,Traffic Engineering Division,Materials,25000.0,25000.0,false, 
+647c649
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Materials,4022.0,347782.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Materials,939.0,344699.0,false, 
+668c670
+< Workers' Compensation Fund,Finance,Workers Compensation,Charges for Services,895290.0,1115000.0,true, 
+---
+> Workers' Compensation Fund,Finance,Workers Compensation,Charges for Services,1095290.0,1315000.0,true, 
+704c706,707
+< General Fund,Public Works,Street Lighting Division,Contracted Services,-2400.0,25000.0,false, 
+---
+> General Fund,Public Works,Street Lighting Division,Contracted Services,-29582.0,0.0,false, 
+> General Fund,Public Works,Street Lighting Division,Contingencies,-46670.0,0.0,false, 
+739c742
+< General Fund,Information Technology,IT Support Services Division,Installment Purch Proceed,-350000.0,-0.0,true, 
+---
+> General Fund,Information Technology,IT Support Services Division,Installment Purch Proceed,-350000.0,0.0,true, 
+811c814
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Insurance Recovery,200000.0,200000.0,true, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Insurance Recovery,100000.0,100000.0,true, 
+856a860
+> General Fund,Transportation,Traffic Engineering Division,Contracted Services,75000.0,75000.0,false, 
+957c961
+< Workers' Compensation Fund,Finance,Workers Compensation,Insurance - Claims,0.0,800000.0,false, 
+---
+> Workers' Compensation Fund,Finance,Workers Compensation,Insurance - Claims,200000.0,1000000.0,false, 
+973c977
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Group Insurance Expense,-7902.0,79016.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Group Insurance Expense,15338.0,102256.0,false, 
+977c981
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Workers Compensation,9583.0,11933.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Workers Compensation,9312.0,11662.0,false, 
+1023,1024c1027,1028
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Employer - 401(K),2150.0,17495.0,false, 
+< Street Cut Utility Fund,Public Works,Street Cuts Division,FICA Tax Expense,3594.0,27073.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Employer - 401(K),3077.0,18422.0,false, 
+> Street Cut Utility Fund,Public Works,Street Cuts Division,FICA Tax Expense,4707.0,28186.0,false, 
+1026c1030
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Employer - LGERS,3564.0,24737.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Employer - LGERS,4876.0,26049.0,false, 
+1076c1080
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Charges for Services - Medical,70891.0,1.0536919E7,true, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Charges for Services - Medical,140611.0,1.0606639E7,true, 
+1107a1112
+> General Fund,Transportation,Street Lighting Division,Contracted Services,-2400.0,25000.0,false, 
+1110a1116
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Licenses Taxes & Fees,150000.0,150000.0,false, 
+1153c1159
+< Property and Liability Fund,Administration Services,General Insurance and Bonds,Insurance - Claims,-100000.0,900000.0,false, 
+---
+> Property and Liability Fund,Administration Services,General Insurance and Bonds,Insurance - Claims,-300000.0,700000.0,false, 
+1159c1165
+< General Fund,Transportation,Traffic Engineering Division,Materials,0.0,117500.0,false, 
+---
+> General Fund,Transportation,Traffic Engineering Division,Materials,-100000.0,17500.0,false, 
+1242a1249
+> General Fund,Information Technology,IT Support Services Division,null,-350000.0,-0.0,true, 
+1350c1357
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Admin Fees -  Medical Ret U 65,13977.0,221577.0,false, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Admin Fees -  Medical Ret U 65,-7576.0,200024.0,false, 
+1353c1360
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,Admin Fees - Medical Active,63252.0,1320552.0,false, 
+---
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,Admin Fees - Medical Active,-65195.0,1192105.0,false, 
+1395c1402
+< General Fund,Building Safety,Permitting & Inspections Div,All Other Revenues,-8650.0,12000.0,true, 
+---
+> General Fund,Building Safety,Permitting & Inspections Div,All Other Revenues,-11150.0,12000.0,true, 
+1400c1407
+< General Fund,Public Works,Street Lighting Division,Street Lighting,-337739.0,1331000.0,false, 
+---
+> General Fund,Public Works,Street Lighting Division,Street Lighting,-1556548.0,0.0,false, 
+1406c1413
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Compensation - Overtime,6731.0,40000.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Compensation - Overtime,-13269.0,20000.0,false, 
+1409c1416
+< Street Cut Utility Fund,Public Works,Street Cuts Division,Compensation - Full Time Reg,-1586.0,305323.0,false, 
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,Compensation - Full Time Reg,61536.0,368445.0,false, 

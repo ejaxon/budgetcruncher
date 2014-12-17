@@ -1,0 +1,50 @@
+2,4c2,4
+< Workers' Compensation Fund,Finance,Workers Compensation,,,,0.0,0.0,0.0,1090300.0,1125000.0,3
+< Workers' Compensation Fund,Finance Total,,,,,0.0,0.0,0.0,1090300.0,1125000.0,2
+< Workers' Compensation Fund Total,,,,,,0.0,0.0,0.0,1090300.0,1125000.0,1
+---
+> Workers' Compensation Fund,Finance,Workers Compensation,,,,0.0,0.0,0.0,1090300.0,1325000.0,3
+> Workers' Compensation Fund,Finance Total,,,,,0.0,0.0,0.0,1090300.0,1325000.0,2
+> Workers' Compensation Fund Total,,,,,,0.0,0.0,0.0,1090300.0,1325000.0,1
+11,16c11,16
+< Street Cut Utility Fund,Public Works,Street Cuts Division,,,,0.0,40000.0,1541597.5199999998,1493808.0,1583814.0,3
+< Street Cut Utility Fund,Public Works Total,,,,,0.0,40000.0,1541597.5199999998,1493808.0,1583814.0,2
+< Street Cut Utility Fund Total,,,,,,0.0,40000.0,1541597.5199999998,1493808.0,1583814.0,1
+< Health Insurance Fund,Human Resources,Group Health Life & Dental,,,,0.0,0.0,0.0,1.3919928E7,1.4167886E7,3
+< Health Insurance Fund,Human Resources Total,,,,,0.0,0.0,0.0,1.3919928E7,1.4167886E7,2
+< Health Insurance Fund Total,,,,,,0.0,0.0,0.0,1.3919928E7,1.4167886E7,1
+---
+> Street Cut Utility Fund,Public Works,Street Cuts Division,,,,0.0,40000.0,1541597.5199999998,1493808.0,1650800.0,3
+> Street Cut Utility Fund,Public Works Total,,,,,0.0,40000.0,1541597.5199999998,1493808.0,1650800.0,2
+> Street Cut Utility Fund Total,,,,,,0.0,40000.0,1541597.5199999998,1493808.0,1650800.0,1
+> Health Insurance Fund,Human Resources,Group Health Life & Dental,,,,0.0,0.0,0.0,1.3919928E7,1.3987606E7,3
+> Health Insurance Fund,Human Resources Total,,,,,0.0,0.0,0.0,1.3919928E7,1.3987606E7,2
+> Health Insurance Fund Total,,,,,,0.0,0.0,0.0,1.3919928E7,1.3987606E7,1
+30,32c30,32
+< Property and Liability Fund,Administration Services,General Insurance and Bonds,,,,0.0,0.0,0.0,2351475.0,2204297.0,3
+< Property and Liability Fund,Administration Services Total,,,,,0.0,0.0,0.0,2351475.0,2204297.0,2
+< Property and Liability Fund Total,,,,,,0.0,0.0,0.0,2351475.0,2204297.0,1
+---
+> Property and Liability Fund,Administration Services,General Insurance and Bonds,,,,0.0,0.0,0.0,2351475.0,2004297.0,3
+> Property and Liability Fund,Administration Services Total,,,,,0.0,0.0,0.0,2351475.0,2004297.0,2
+> Property and Liability Fund Total,,,,,,0.0,0.0,0.0,2351475.0,2004297.0,1
+40c40
+< General Fund,Information Technology,IT Support Services Division,,,,0.0,0.0,0.0,350000.0,0.0,3
+---
+> General Fund,Information Technology,IT Support Services Division,,,,0.0,0.0,0.0,700000.0,0.0,3
+43c43
+< General Fund,Information Technology Total,,,,,61369.009999999995,77005.16,191470.07,479250.0,133700.0,2
+---
+> General Fund,Information Technology Total,,,,,61369.009999999995,77005.16,191470.07,829250.0,133700.0,2
+70,71c70,71
+< General Fund,Building Safety,Permitting & Inspections Div,,,,2182754.89,2141936.63,2276288.9699999997,2214450.0,2928158.0,3
+< General Fund,Building Safety Total,,,,,2182754.89,2141936.63,2276288.9699999997,2214450.0,2928158.0,2
+---
+> General Fund,Building Safety,Permitting & Inspections Div,,,,2182754.89,2141936.63,2278323.9699999997,2216950.0,2928158.0,3
+> General Fund,Building Safety Total,,,,,2182754.89,2141936.63,2278323.9699999997,2216950.0,2928158.0,2
+84,85c84,85
+< General Fund Total,,,,,,7.962751963999996E7,8.233473235999998E7,8.547184964999996E7,9.5861764E7,9.9547954E7,1
+< REVENUES TOTAL,,,,,,1.2108848981999996E8,1.2868459671000002E8,1.3375235692999996E8,1.73174765E8,1.72411137E8,0
+---
+> General Fund Total,,,,,,7.962751963999996E7,8.233473235999998E7,8.547388464999996E7,9.6214264E7,9.9547954E7,1
+> REVENUES TOTAL,,,,,,1.2108848981999996E8,1.2868459671000002E8,1.3375439192999996E8,1.73527265E8,1.72297843E8,0

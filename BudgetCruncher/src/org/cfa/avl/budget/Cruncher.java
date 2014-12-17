@@ -18,7 +18,6 @@ public class Cruncher {
 	static String annotationRegex = "((\\d{4})-(\\d{2})-(\\d{2})-([\\d\\w]{3})-(\\d{4})-(\\d{5})-(\\d{5})-(\\d{3})-(\\d{6}))";
 	private static PrintWriter expenseOutput = null, revenueOutput = null, diffOutput = null;
 
-	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		HashMap<String, Integer> fileList = new HashMap<String, Integer>();
@@ -67,8 +66,6 @@ public class Cruncher {
 						System.out.println("Adding file: " + fileName + " using column " + column);
 					}
 					else if (nm.equalsIgnoreCase("input2")) {
-						Integer column;
-						String fileName;
 						nvPair = value.split(",");
 						if (nvPair.length != 2) {
 							System.err.println("Format error in config file line: " + line);
@@ -123,14 +120,21 @@ public class Cruncher {
 
 		int baseYear = Integer.parseInt(parameters.get("startYear"));
 		int numberOfYears = Integer.parseInt(parameters.get("numberOfYears"));
-		
-		topRevLevel = new AccountEntry(null, numberOfYears, true, 0, null, null, null, null);
-		topExpLevel = new AccountEntry(null, numberOfYears, false, 0, null, null, null, null);
+		boolean pruneZero = Boolean.parseBoolean(parameters.get("pruneZero"));
+		System.out.println("PruneZero = " + pruneZero);
+		int hierarchyCollapse = Integer.parseInt(parameters.get("hierarchyCollapse"));
+		System.out.println("pruneZero = " + pruneZero + ", hiarchycollapse = " + hierarchyCollapse);
+
+		topRevLevel = new AccountEntry(null, numberOfYears, true, 0, null, null, null, null, hierarchyCollapse);
+		topExpLevel = new AccountEntry(null, numberOfYears, false, 0, null, null, null, null, hierarchyCollapse);
 		try {
 			Integer selectedColumn;
 			/*
 			 * Read in all of the files - each file specifies a name and a column to pick the value from
 			 * (e.g., we may wish to use actuals from previous years, but budget from the current)
+			 */
+			/*
+			 * Note that we are reading only years prior to last year this way. See note on budget file below
 			 */
 			for (String fileName : fileList.keySet()) {
 				filePath = directoryName + fileName;
@@ -140,7 +144,7 @@ public class Cruncher {
 					System.out.println("Processing file " + fileName);
 
 					processInputFile(input, accountEntries, baseYear, numberOfYears, selectedColumn,
-									 fundMap, deptMap, divisionMap, objectMap);
+									 fundMap, deptMap, divisionMap, objectMap, hierarchyCollapse);
 					try {
 						input.close();
 					}
@@ -151,15 +155,16 @@ public class Cruncher {
 			}
 			
 			/*
-			 * Now read the budget file
+			 * Now read the budget file. This is where we get both the current proposed budget AND last years'
+			 * original budget (if the 3rd parameter is true)
 			 */
 			filePath = directoryName + budgetFile;
 			input = new BufferedReader(new FileReader(filePath));
 			if (input != null) {
 				System.out.println("Processing budget file " + budgetFile);
 
-				processBudgetFile(input, accountEntries, budgetYear, baseYear, numberOfYears,
-								 fundMap, deptMap, divisionMap, objectMap);
+				processBudgetFile(input, accountEntries, true, budgetYear, baseYear, numberOfYears,
+								 fundMap, deptMap, divisionMap, objectMap, hierarchyCollapse);
 				try {
 					input.close();
 				}
@@ -182,24 +187,25 @@ public class Cruncher {
 					ex.printStackTrace();
 				}
 			}
-			
+			ArrayList<AccountEntry> toDelete = null;
 			/*
 			 * Now prune entries that are zero the last 2 years
 			 */
-			ArrayList<AccountEntry> toDelete = new ArrayList<AccountEntry>();
-			for (String account: accountEntries.keySet()) {
-				AccountEntry a = accountEntries.get(account);
-				Double[] values = a.getValues();
-				if (values != null && values.length > 1) {
-					double d = Math.abs(values[values.length-1]) + Math.abs(values[values.length-2]);
-					if (d < 0.5) toDelete.add(a);
+			if (pruneZero) {
+				toDelete = new ArrayList<AccountEntry>();
+				for (String account: accountEntries.keySet()) {
+					AccountEntry a = accountEntries.get(account);
+					Double[] values = a.getValues();
+					if (values != null && values.length > 1) {
+						double d = Math.abs(values[values.length-1]) + Math.abs(values[values.length-2]);
+						if (d < 0.5) toDelete.add(a);
+					}
+				}
+				while (toDelete.size() > 0) {
+					AccountEntry a = toDelete.remove(0);
+					accountEntries.remove(a.accountCode);
 				}
 			}
-			while (toDelete.size() > 0) {
-				AccountEntry a = toDelete.remove(0);
-				accountEntries.remove(a.accountCode);
-			}
-			
 			
 			/*
 			 * Next, let's just aggregate any accounts that are never over a certain amount
@@ -223,19 +229,19 @@ public class Cruncher {
 				AccountEntry a = toDelete.remove(0);
 				accountEntries.remove(a.accountCode);
 				if (a.isRevenue()) {
-					String key = a.fund + "." + a.deptdiv + ".All Other Revenues";
+					String key = a.fund + "." + a.merged + ".All Other Revenues";
 					AccountEntry agg = accountEntries.get(key);
 					if (agg == null) {
-						agg = new AccountEntry (key, numberOfYears, true, 3, a.fund, a.department, a.division, "All Other Revenues");
+						agg = new AccountEntry (key, numberOfYears, true, 3, a.fund, a.department, a.division, "All Other Revenues", hierarchyCollapse);
 						accountEntries.put(key,  agg);
 					}
 					agg.addValues(a.getValues());
 				}
 				else {
-					String key = a.fund + "." + a.deptdiv + ".All Other Expenses";
+					String key = a.fund + "." + a.merged + ".All Other Expenses";
 					AccountEntry agg = accountEntries.get(key);
 					if (agg == null) {
-						agg = new AccountEntry (key, numberOfYears, false, 3, a.fund, a.department, a.division, "All Other Expenses");
+						agg = new AccountEntry (key, numberOfYears, false, 3, a.fund, a.department, a.division, "All Other Expenses", hierarchyCollapse);
 						accountEntries.put(key,  agg);
 					}
 					agg.addValues(a.getValues());					
@@ -250,9 +256,9 @@ public class Cruncher {
 				++count;
 				AccountEntry accountEntry = accountEntries.get(account);
 				if (accountEntry.isRevenue())
-					topRevLevel.addEntry(accountEntry);
+					topRevLevel.addEntry(accountEntry, hierarchyCollapse);
 				else
-					topExpLevel.addEntry(accountEntry);
+					topExpLevel.addEntry(accountEntry, hierarchyCollapse);
 			}
 			
 			System.out.println("Count is " + count);
@@ -270,11 +276,11 @@ public class Cruncher {
 				
 				expenseOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "expenses.csv")));
 				expenseOutput.println(header);
-				topExpLevel.printEntries(expenseOutput);
+				topExpLevel.printEntries(expenseOutput, hierarchyCollapse);
 				
 				revenueOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "revenues.csv")));				
 				revenueOutput.println(header);
-				topRevLevel.printEntries(revenueOutput);
+				topRevLevel.printEntries(revenueOutput, hierarchyCollapse);
 			}
 			catch (Exception ex) {
 				ex.printStackTrace();
@@ -285,17 +291,14 @@ public class Cruncher {
 			if (expenseOutput  != null) {
 				expenseOutput .close();
 			}
-			
-			
-			Pattern pattern = Pattern.compile(annotationRegex);
-			
+						
 			/*
 			 * Now output the diffs file
 			 */
 			diffOutput  = new PrintWriter(new BufferedWriter(new FileWriter(directoryName + "budgetdiffs.csv")));
 			 		
 			try {
-				diffOutput.println("Fund,Department,Division,Account,Amount,Current,Annotation,");
+				diffOutput.println("Fund,Department,Division,Account,Amount,Current,Revenue,Annotation,");
 
 				for (String account: accountEntries.keySet()) {
 					AccountEntry a = accountEntries.get(account);
@@ -311,7 +314,7 @@ public class Cruncher {
 					}
 
 					diff = newVal - oldVal;
-					diffLine += "," + diff.toString() + "," + newVal + "," + annotation;
+					diffLine += "," + diff.toString() + "," + newVal + "," + a.isRevenue() + "," + annotation;
 					diffOutput.println(diffLine);
 				}
 			}
@@ -342,16 +345,17 @@ public class Cruncher {
 		}
 	}
 	
-	static void processBudgetFile(BufferedReader input, HashMap<String, AccountEntry> accountEntries, int year,
-			int baseYear, int nYears,
+	static void processBudgetFile(BufferedReader input, HashMap<String, AccountEntry> accountEntries, 
+			boolean getLastYearBudget,
+			int year, int baseYear, int nYears,
 			HashMap<String, String> fundMap, HashMap<String, String> deptMap, HashMap<String, 
-			String> divisionMap, HashMap<String, String> objectMap) throws Exception {
+			String> divisionMap, HashMap<String, String> objectMap, int hierarchyCollapse) throws Exception {
 		String line, previousLine = null;
 		String[] items;
 		int yearDelta;
 		String budgetRegex = "((\\d{4})-(\\d{2})-(\\d{2})-([\\d\\w]{3})-(\\d{4})-(\\d{5})-(\\d{5})-(\\d{3})-(\\d{6}))-";
 		Pattern pattern = Pattern.compile(budgetRegex);
-		int count = 0, dataColumn = 9;
+		int count = 0, currentYearBudgetColumn = 9, previousYearBudgetColumn = 5; // 5 for last year, 9 for this year budget
 
 		yearDelta = year - baseYear;
 
@@ -387,10 +391,12 @@ public class Cruncher {
 					}
 					acctEntry = new AccountEntry (accountCode, nYears, isRev, 3,
 							fundMap.get(fundCode), deptMap.get(deptCode), 
-							divisionMap.get(divisionCode), objectMap.get(objectCode));
+							divisionMap.get(divisionCode), objectMap.get(objectCode), hierarchyCollapse);
 					accountEntries.put(accountCode, acctEntry);
 				}
-				acctEntry.setValue(yearDelta, items[dataColumn].trim(), true);
+				acctEntry.setValue(yearDelta, items[currentYearBudgetColumn].trim(), true);
+				if (getLastYearBudget) 
+					acctEntry.setValue(yearDelta-1, items[previousYearBudgetColumn].trim(), true);
 			}
 			previousLine = line;
 		}
@@ -401,7 +407,8 @@ public class Cruncher {
 	static void processInputFile(BufferedReader input, HashMap<String, AccountEntry> accountEntries, 
 								int baseYear, int nYears, int selectedColumn,
 								HashMap<String, String> fundMap, HashMap<String, String> deptMap, HashMap<String, 
-								String> divisionMap, HashMap<String, String> objectMap) throws Exception {
+								String> divisionMap, HashMap<String, String> objectMap,
+								int hierarchyCollapse) throws Exception {
 		String line;
 		String[] items;
 		int year, yearDelta;
@@ -445,7 +452,7 @@ public class Cruncher {
 					}
 					acctEntry = new AccountEntry (accountCode, nYears, isRev, 3,
 												  fundMap.get(fundCode), deptMap.get(deptCode), 
-												  divisionMap.get(divisionCode), objectMap.get(objectCode));
+												  divisionMap.get(divisionCode), objectMap.get(objectCode), hierarchyCollapse);
 					accountEntries.put(accountCode, acctEntry);
 				}
 				acctEntry.setValue(yearDelta, items[selectedColumn].trim(), true);
